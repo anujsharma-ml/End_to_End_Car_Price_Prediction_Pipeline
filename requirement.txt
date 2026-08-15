@@ -1,0 +1,9 @@
+ipykernel 
+pandas 
+numpy
+xgboost 
+streamlit 
+joblib
+matplotlib
+seaborn
+scikit-learn==1.6.1
