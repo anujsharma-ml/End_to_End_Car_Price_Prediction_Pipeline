@@ -7,6 +7,27 @@ import numpy as np
 import pandas as pd
 import streamlit as st
 
+# ==========================================
+# ROBUST SCIKIT-LEARN COMPATIBILITY PATCHES
+# ==========================================
+import sklearn.compose._column_transformer
+from sklearn.impute import SimpleImputer
+
+if not hasattr(
+    sklearn.compose._column_transformer, "_RemainderColsList"
+):
+    class _RemainderColsList(list):
+        pass
+
+    sklearn.compose._column_transformer._RemainderColsList = _RemainderColsList
+
+# Robust patch for SimpleImputer _fill_dtype method
+if not hasattr(SimpleImputer, "_fill_dtype"):
+    def _fill_dtype(self, X=None):
+        return getattr(self, "fill_value_", None)
+
+    SimpleImputer._fill_dtype = _fill_dtype
+
 # 1. Custom Transformer Class for Unpickling
 from model import Iqrclipper
 
