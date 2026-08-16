@@ -7,14 +7,27 @@ import numpy as np
 import pandas as pd
 import streamlit as st
 
+# ==========================================
+# FIX FOR SCIKIT-LEARN VERSION COMPATIBILITY
+# ==========================================
+import sklearn.compose._column_transformer
+
+if not hasattr(
+    sklearn.compose._column_transformer, "_RemainderColsList"
+):
+    class _RemainderColsList(list):
+        pass
+
+    sklearn.compose._column_transformer._RemainderColsList = _RemainderColsList
+
 # 1. Import Custom Transformer and Bind to __main__ for joblib unpickling
 from model import Iqrclipper
 
-sys.modules['__main__'].Iqrclipper = Iqrclipper
+sys.modules["__main__"].Iqrclipper = Iqrclipper
 __main__.Iqrclipper = Iqrclipper
 
 # 2. Get Absolute Path of the Model File
-MODEL_PATH = os.path.join(os.path.dirname(__file__), 'car_price_model.pkl')
+MODEL_PATH = os.path.join(os.path.dirname(__file__), "car_price_model.pkl")
 
 # PAGE CONFIGURATION
 st.set_page_config(
