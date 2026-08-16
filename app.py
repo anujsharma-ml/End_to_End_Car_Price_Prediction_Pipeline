@@ -290,7 +290,7 @@ div[data-baseweb="select"] > div, div[data-baseweb="input"] > div {
 
     .hero {
         padding: 25px 20px;
-        min-height: 390px; /* Adjusted height to fit mobile title + small car */
+        min-height: 390px;
         border-radius: 20px;
     }
 
@@ -305,7 +305,6 @@ div[data-baseweb="select"] > div, div[data-baseweb="input"] > div {
         line-height: 1.5;
     }
 
-    /* Scaling down the Road and Car for mobile so they look neat and don't break layout */
     .road {
         height: 75px;
     }
@@ -323,7 +322,7 @@ div[data-baseweb="select"] > div, div[data-baseweb="input"] > div {
     }
 
     .car {
-        transform: scale(0.55); /* Chota kar diya car ko */
+        transform: scale(0.55);
         transform-origin: bottom left;
         bottom: 35px;
     }
@@ -435,6 +434,7 @@ try:
     model = load_model()
 except Exception as e:
     model = None
+    st.error(f"Detailed Load Error: {e}")
 
 # VEHICLE INPUT SECTION
 st.markdown('<div class="section-title">Vehicle Valuation Parameters</div>', unsafe_allow_html=True)
@@ -514,4 +514,3 @@ if predict_button:
             st.error(f"Error during prediction execution: {e}")
     else:
         st.error("Model file ('car_price_model.pkl') could not be loaded. Please ensure it is present in the working directory along with 'model.py'.")
-        
