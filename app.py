@@ -1,23 +1,32 @@
-import streamlit as st
-import pandas as pd
-import numpy as np
 import datetime
-import joblib
+import os
+import sys
 import __main__
-from model import Iqrclipper  # Custom class import
+import joblib
+import numpy as np
+import pandas as pd
+import streamlit as st
 
+# 1. Import Custom Transformer and Bind to __main__ for joblib unpickling
+from model import Iqrclipper
+
+sys.modules['__main__'].Iqrclipper = Iqrclipper
 __main__.Iqrclipper = Iqrclipper
+
+# 2. Get Absolute Path of the Model File
+MODEL_PATH = os.path.join(os.path.dirname(__file__), 'car_price_model.pkl')
 
 # PAGE CONFIGURATION
 st.set_page_config(
     page_title="AutoValue — Car Price Predictor",
     page_icon="🚘",
     layout="wide",
-    initial_sidebar_state="collapsed"
+    initial_sidebar_state="collapsed",
 )
 
 # CUSTOM STYLING & RESPONSIVE ANIMATIONS
-st.markdown("""
+st.markdown(
+    """
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
@@ -283,9 +292,6 @@ div[data-baseweb="select"] > div, div[data-baseweb="input"] > div {
     color: white !important;
 }
 
-/* ==========================================================
-   RESPONSIVE MEDIA QUERIES FOR MOBILE & TABLETS (Max-width: 768px)
-   ========================================================== */
 @media screen and (max-width: 768px) {
     .block-container {
         padding: 1rem 1rem 3rem 1rem !important;
@@ -354,18 +360,24 @@ div[data-baseweb="select"] > div, div[data-baseweb="input"] > div {
     }
 }
 </style>
-""", unsafe_allow_html=True)
+""",
+    unsafe_allow_html=True,
+)
 
 # NAVBAR SECTION
-st.markdown("""
+st.markdown(
+    """
 <div class="navbar">
     <div class="logo">Auto<span>Value</span></div>
     <div class="nav-badge">AI POWERED · CAR VALUATION</div>
 </div>
-""", unsafe_allow_html=True)
+""",
+    unsafe_allow_html=True,
+)
 
 # HERO SECTION
-st.markdown("""
+st.markdown(
+    """
 <div class="hero">
     <div class="hero-content">
         <div class="eyebrow">
@@ -393,11 +405,19 @@ st.markdown("""
         <div class="wheel right"></div>
     </div>
 </div>
-""", unsafe_allow_html=True)
+""",
+    unsafe_allow_html=True,
+)
 
 # MODEL OVERVIEW INFO CARDS
-st.markdown('<div class="section-title">System Overview</div>', unsafe_allow_html=True)
-st.markdown('<div class="section-subtitle">Core components powering your vehicle estimation pipeline based on UserCarData.csv.</div>', unsafe_allow_html=True)
+st.markdown(
+    '<div class="section-title">System Overview</div>', unsafe_allow_html=True
+)
+st.markdown(
+    '<div class="section-subtitle">Core components powering your vehicle'
+    " estimation pipeline based on UserCarData.csv.</div>",
+    unsafe_allow_html=True,
+)
 
 col_ic1, col_ic2, col_ic3 = st.columns(3)
 
@@ -406,17 +426,18 @@ with col_ic1:
         '<div class="info-card">'
         '<div class="info-card-title">Model Architecture</div>'
         '<div class="info-card-value">XGBoost Regressor (Tuned)</div>'
-        '</div>',
-        unsafe_allow_html=True
+        "</div>",
+        unsafe_allow_html=True,
     )
 
 with col_ic2:
     st.markdown(
         '<div class="info-card">'
         '<div class="info-card-title">Dataset Range</div>'
-        '<div class="info-card-value">Years: 1994 – 2020 | Price: ₹30k – ₹10L+</div>'
-        '</div>',
-        unsafe_allow_html=True
+        '<div class="info-card-value">Years: 1994 – 2020 | Price: ₹30k –'
+        " ₹10L+</div>"
+        "</div>",
+        unsafe_allow_html=True,
     )
 
 with col_ic3:
@@ -424,96 +445,196 @@ with col_ic3:
         '<div class="info-card">'
         '<div class="info-card-title">Preprocessing</div>'
         '<div class="info-card-value">IQR Clipping + Robust Scaling</div>'
-        '</div>',
-        unsafe_allow_html=True
+        "</div>",
+        unsafe_allow_html=True,
     )
 
-# LOAD TRAINED MODEL
+# LOAD TRAINED MODEL WITH ABSOLUTE PATH & DETAILED ERROR HANDLING
 @st.cache_resource
 def load_model():
-    return joblib.load('car_price_model.pkl')
+    return joblib.load(MODEL_PATH)
+
 
 try:
     model = load_model()
 except Exception as e:
     model = None
-    st.error(f"Detailed Load Error: {e}")
+    st.error(f"🚨 Detailed Model Load Error: {e}")
 
 # VEHICLE INPUT SECTION
-st.markdown('<div class="section-title">Vehicle Valuation Parameters</div>', unsafe_allow_html=True)
-st.markdown('<div class="section-subtitle">Enter parameters based on dataset ranges (Years 1994–2020, Mileage 0–42 kmpl, Engine 624–3604 CC, Power 33–400 bhp).</div>', unsafe_allow_html=True)
+st.markdown(
+    '<div class="section-title">Vehicle Valuation Parameters</div>',
+    unsafe_allow_html=True,
+)
+st.markdown(
+    '<div class="section-subtitle">Enter parameters based on dataset ranges'
+    ' (Years 1994–2020, Mileage 0–42 kmpl, Engine 624–3604 CC, Power 33–400'
+    " bhp).</div>",
+    unsafe_allow_html=True,
+)
 
 input_col1, input_col2 = st.columns(2, gap="large")
 
 with input_col1:
-    name = st.selectbox("Car Brand / Name", [
-        "Maruti", "Skoda", "Honda", "Hyundai", "Toyota", "Ford", "Renault", "Mahindra", 
-        "Tata", "Chevrolet", "Datsun", "Jeep", "Mercedes", "Mitsubishi", "Audi", 
-        "Volkswagen", "BMW", "Nissan", "Lexus", "Jaguar", "Land", "MG", "Volvo", "Daewoo", 
-        "Kia", "Fiat", "Force", "Ambassador", "Ashok", "Isuzu", "Opel", "other"
-    ], help="Select the brand/manufacturer of the car from dataset categories.")
-    
-    year = st.slider("Manufacturing Year", min_value=1994, max_value=2020, value=2015, 
-                     help="Dataset cars range from 1994 to 2020.")
-    
-    km_driven = st.number_input("Kilometers Driven (km)", min_value=1, max_value=2500000, value=50000, step=1000,
-                                help="Typical range in dataset: 1,000 to 2,500,000 km.")
-    
-    fuel = st.selectbox("Fuel Type", ["Petrol", "Diesel", "CNG", "LPG"], 
-                        help="Fuel type option matching dataset.")
-    
-    seller_type = st.selectbox("Seller Type", ["Individual", "Dealer", "Trustmark_Dealer"], 
-                               help="Type of seller listing the car.")
+    name = st.selectbox(
+        "Car Brand / Name",
+        [
+            "Maruti",
+            "Skoda",
+            "Honda",
+            "Hyundai",
+            "Toyota",
+            "Ford",
+            "Renault",
+            "Mahindra",
+            "Tata",
+            "Chevrolet",
+            "Datsun",
+            "Jeep",
+            "Mercedes",
+            "Mitsubishi",
+            "Audi",
+            "Volkswagen",
+            "BMW",
+            "Nissan",
+            "Lexus",
+            "Jaguar",
+            "Land",
+            "MG",
+            "Volvo",
+            "Daewoo",
+            "Kia",
+            "Fiat",
+            "Force",
+            "Ambassador",
+            "Ashok",
+            "Isuzu",
+            "Opel",
+            "other",
+        ],
+        help="Select the brand/manufacturer of the car from dataset categories.",
+    )
+
+    year = st.slider(
+        "Manufacturing Year",
+        min_value=1994,
+        max_value=2020,
+        value=2015,
+        help="Dataset cars range from 1994 to 2020.",
+    )
+
+    km_driven = st.number_input(
+        "Kilometers Driven (km)",
+        min_value=1,
+        max_value=2500000,
+        value=50000,
+        step=1000,
+        help="Typical range in dataset: 1,000 to 2,500,000 km.",
+    )
+
+    fuel = st.selectbox(
+        "Fuel Type",
+        ["Petrol", "Diesel", "CNG", "LPG"],
+        help="Fuel type option matching dataset.",
+    )
+
+    seller_type = st.selectbox(
+        "Seller Type",
+        ["Individual", "Dealer", "Trustmark_Dealer"],
+        help="Type of seller listing the car.",
+    )
 
 with input_col2:
-    transmission = st.selectbox("Transmission Type", ["Manual", "Automatic"], 
-                                help="Gearbox type.")
-    
-    owner = st.selectbox("Owner Category", [
-        "First_Owner", "Second_Owner", "Third_Owner", "Fourth_Above_Owner", "Test_Drive_Car"
-    ], help="Previous ownership history.")
-    
-    mileage = st.number_input("Mileage (kmpl)", min_value=0.0, max_value=42.0, value=19.3, step=0.1,
-                              help="Dataset range: 0.0 to 42.0 kmpl.")
-    
-    engine = st.number_input("Engine Capacity (CC)", min_value=624, max_value=3604, value=1248, step=50,
-                             help="Dataset range: 624 CC to 3,604 CC.")
-    
-    max_power = st.number_input("Max Power (bhp)", min_value=32.8, max_value=400.0, value=82.0, step=1.0,
-                                help="Dataset range: 32.8 bhp to 400.0 bhp.")
+    transmission = st.selectbox(
+        "Transmission Type", ["Manual", "Automatic"], help="Gearbox type."
+    )
+
+    owner = st.selectbox(
+        "Owner Category",
+        [
+            "First_Owner",
+            "Second_Owner",
+            "Third_Owner",
+            "Fourth_Above_Owner",
+            "Test_Drive_Car",
+        ],
+        help="Previous ownership history.",
+    )
+
+    mileage = st.number_input(
+        "Mileage (kmpl)",
+        min_value=0.0,
+        max_value=42.0,
+        value=19.3,
+        step=0.1,
+        help="Dataset range: 0.0 to 42.0 kmpl.",
+    )
+
+    engine = st.number_input(
+        "Engine Capacity (CC)",
+        min_value=624,
+        max_value=3604,
+        value=1248,
+        step=50,
+        help="Dataset range: 624 CC to 3,604 CC.",
+    )
+
+    max_power = st.number_input(
+        "Max Power (bhp)",
+        min_value=32.8,
+        max_value=400.0,
+        value=82.0,
+        step=1.0,
+        help="Dataset range: 32.8 bhp to 400.0 bhp.",
+    )
 
 st.markdown("<br>", unsafe_allow_html=True)
 
 # PREDICTION ACTION BUTTON
-predict_button = st.button("Calculate Predicted Price", type="primary", use_container_width=True)
+predict_button = st.button(
+    "Calculate Predicted Price", type="primary", use_container_width=True
+)
 
 if predict_button:
     if model is not None:
-        current_year = 2020  
+        current_year = 2020
         age_of_car = current_year - year
 
-        input_data = pd.DataFrame({
-            'name': [name],
-            'km_driven': [km_driven],
-            'fuel': [fuel],
-            'seller_type': [seller_type],
-            'transmission': [transmission],
-            'owner': [owner],
-            'mileage': [mileage],
-            'engine': [engine],
-            'max_power': [max_power],
-            'age_of_car': [age_of_car]
-        })
-        
+        input_data = pd.DataFrame(
+            {
+                "name": [name],
+                "km_driven": [km_driven],
+                "fuel": [fuel],
+                "seller_type": [seller_type],
+                "transmission": [transmission],
+                "owner": [owner],
+                "mileage": [mileage],
+                "engine": [engine],
+                "max_power": [max_power],
+                "age_of_car": [age_of_car],
+            }
+        )
+
         try:
             prediction = model.predict(input_data)
             pred_price = prediction[0]
-            
+
             st.markdown("<br>", unsafe_allow_html=True)
-            st.success(f"### Estimated Market Selling Price: ₹ {pred_price:,.2f}")
-            
-            st.info(f"💡 **Dataset Context:** For a car of age {age_of_car} years with {km_driven:,} km driven, the model prediction of **₹ {pred_price:,.2f}** falls within expected market boundaries derived from training distribution.")
+            st.success(
+                f"### Estimated Market Selling Price: ₹ {pred_price:,.2f}"
+            )
+
+            st.info(
+                f"💡 **Dataset Context:** For a car of age {age_of_car} years"
+                f" with {km_driven:,} km driven, the model prediction of **₹"
+                f" {pred_price:,.2f}** falls within expected market"
+                " boundaries derived from training distribution."
+            )
         except Exception as e:
             st.error(f"Error during prediction execution: {e}")
     else:
-        st.error("Model file ('car_price_model.pkl') could not be loaded. Please ensure it is present in the working directory along with 'model.py'.")
+        st.error(
+            "Model file ('car_price_model.pkl') could not be loaded. Please"
+            " ensure it is present in the working directory along with"
+            " 'model.py'."
+        )
