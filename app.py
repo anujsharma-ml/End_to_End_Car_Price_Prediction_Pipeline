@@ -5,6 +5,8 @@ import datetime
 import joblib
 from model import Iqrclipper  # Custom class import
 
+__main__.Iqrclipper = Iqrclipper
+
 # PAGE CONFIGURATION
 st.set_page_config(
     page_title="AutoValue — Car Price Predictor",
