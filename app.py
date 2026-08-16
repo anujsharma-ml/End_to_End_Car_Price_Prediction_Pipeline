@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 import datetime
 import joblib
+import __main__
 from model import Iqrclipper  # Custom class import
 
 __main__.Iqrclipper = Iqrclipper
