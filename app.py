@@ -13,7 +13,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# CUSTOM STYLING & ANIMATIONS
+# CUSTOM STYLING & RESPONSIVE ANIMATIONS
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
@@ -34,6 +34,7 @@ st.markdown("""
 footer { visibility: hidden; }
 header { visibility: hidden; }
 
+/* Default Desktop Container Padding */
 .block-container {
     padding: 2rem 5rem 4rem 5rem;
     max-width: 1400px;
@@ -68,14 +69,14 @@ header { visibility: hidden; }
 .hero {
     position: relative;
     overflow: hidden;
-    min-height: 460px;
+    min-height: 420px;
     border-radius: 28px;
     border: 1px solid rgba(255,255,255,0.09);
     background: 
         linear-gradient(110deg, rgba(5,10,18,0.98), rgba(8,19,32,0.82)),
         #0a111c;
     box-shadow: 0 30px 80px rgba(0,0,0,0.45);
-    padding: 65px;
+    padding: 60px;
     margin-bottom: 40px;
 }
 
@@ -277,6 +278,60 @@ div[data-baseweb="select"] > div, div[data-baseweb="input"] > div {
     border-color: rgba(255, 255, 255, 0.1) !important;
     color: white !important;
 }
+
+/* ==========================================================
+   RESPONSIVE MEDIA QUERIES FOR MOBILE & TABLETS (Max-width: 768px)
+   ========================================================== */
+@media screen and (max-width: 768px) {
+    .block-container {
+        padding: 1rem 1rem 3rem 1rem !important;
+    }
+
+    .hero {
+        padding: 30px 20px;
+        min-height: 320px;
+        border-radius: 20px;
+    }
+
+    .hero h1 {
+        font-size: 34px !important;
+        letter-spacing: -1.5px;
+        margin: 15px 0 12px 0;
+    }
+
+    .hero p {
+        font-size: 14px;
+        line-height: 1.5;
+    }
+
+    /* Hide heavy animations on small mobile screens to prevent performance lags and screen width breaks */
+    .road, .car {
+        display: none !important;
+    }
+
+    .section-title {
+        font-size: 22px;
+        margin: 30px 0 6px 0;
+    }
+
+    .section-subtitle {
+        font-size: 13px;
+        margin-bottom: 15px;
+    }
+
+    .navbar {
+        padding: 10px 0 15px 0;
+    }
+
+    .logo {
+        font-size: 22px;
+    }
+
+    .nav-badge {
+        font-size: 11px;
+        padding: 5px 10px;
+    }
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -284,7 +339,7 @@ div[data-baseweb="select"] > div, div[data-baseweb="input"] > div {
 st.markdown("""
 <div class="navbar">
     <div class="logo">Auto<span>Value</span></div>
-    <div class="nav-badge">AI POWERED · USED CAR VALUATION</div>
+    <div class="nav-badge">AI POWERED · CAR VALUATION</div>
 </div>
 """, unsafe_allow_html=True)
 
@@ -304,7 +359,7 @@ st.markdown("""
             advanced machine learning trained on real-world vehicle data.
         </p>
         <div class="scroll-cue">
-            <span>👇 Scroll down to enter details & check car price</span>
+            <span>👇 Scroll down to enter details</span>
         </div>
     </div>
     <div class="road"></div>
@@ -347,7 +402,7 @@ with col_ic3:
     st.markdown(
         '<div class="info-card">'
         '<div class="info-card-title">Preprocessing</div>'
-        '<div class="info-card-value">IQR Clipping + Robust Scaling + Log Target</div>'
+        '<div class="info-card-value">IQR Clipping + Robust Scaling</div>'
         '</div>',
         unsafe_allow_html=True
     )
@@ -364,7 +419,7 @@ except Exception as e:
 
 # VEHICLE INPUT SECTION
 st.markdown('<div class="section-title">Vehicle Valuation Parameters</div>', unsafe_allow_html=True)
-st.markdown('<div class="section-subtitle">Enter parameters based on dataset ranges (Dataset span: Years 1994–2020, Mileage 0–42 kmpl, Engine 624–3604 CC, Power 33–400 bhp).</div>', unsafe_allow_html=True)
+st.markdown('<div class="section-subtitle">Enter parameters based on dataset ranges (Years 1994–2020, Mileage 0–42 kmpl, Engine 624–3604 CC, Power 33–400 bhp).</div>', unsafe_allow_html=True)
 
 input_col1, input_col2 = st.columns(2, gap="large")
 
@@ -380,7 +435,7 @@ with input_col1:
                      help="Dataset cars range from 1994 to 2020.")
     
     km_driven = st.number_input("Kilometers Driven (km)", min_value=1, max_value=2500000, value=50000, step=1000,
-                                help="Typical range in dataset: 1,000 to 2,500,000 km. Median is ~60,000 km.")
+                                help="Typical range in dataset: 1,000 to 2,500,000 km.")
     
     fuel = st.selectbox("Fuel Type", ["Petrol", "Diesel", "CNG", "LPG"], 
                         help="Fuel type option matching dataset.")
@@ -397,13 +452,13 @@ with input_col2:
     ], help="Previous ownership history.")
     
     mileage = st.number_input("Mileage (kmpl)", min_value=0.0, max_value=42.0, value=19.3, step=0.1,
-                              help="Dataset range: 0.0 to 42.0 kmpl. Median is ~19.3 kmpl.")
+                              help="Dataset range: 0.0 to 42.0 kmpl.")
     
     engine = st.number_input("Engine Capacity (CC)", min_value=624, max_value=3604, value=1248, step=50,
-                             help="Dataset range: 624 CC to 3,604 CC. Median is 1,248 CC.")
+                             help="Dataset range: 624 CC to 3,604 CC.")
     
     max_power = st.number_input("Max Power (bhp)", min_value=32.8, max_value=400.0, value=82.0, step=1.0,
-                                help="Dataset range: 32.8 bhp to 400.0 bhp. Median is 82.0 bhp.")
+                                help="Dataset range: 32.8 bhp to 400.0 bhp.")
 
 st.markdown("<br>", unsafe_allow_html=True)
 
@@ -412,7 +467,7 @@ predict_button = st.button("Calculate Predicted Price", type="primary", use_cont
 
 if predict_button:
     if model is not None:
-        current_year = 2020  # Dataset max year is 2020, so age is computed relative to training era
+        current_year = 2020  
         age_of_car = current_year - year
 
         input_data = pd.DataFrame({
@@ -435,9 +490,9 @@ if predict_button:
             st.markdown("<br>", unsafe_allow_html=True)
             st.success(f"### Estimated Market Selling Price: ₹ {pred_price:,.2f}")
             
-            # Additional Context / Range Validation based on dataset stats
-            st.info(f"💡 **Dataset Context:** For a car of age {age_of_car} years with {km_driven:,} km driven, the model prediction of **₹ {pred_price:,.2f}** falls well within expected market boundaries derived from the training distribution (Min: ₹30k, Median: ₹4.5L, Max: ₹10L+).")
+            st.info(f"💡 **Dataset Context:** For a car of age {age_of_car} years with {km_driven:,} km driven, the model prediction of **₹ {pred_price:,.2f}** falls within expected market boundaries derived from training distribution.")
         except Exception as e:
             st.error(f"Error during prediction execution: {e}")
     else:
         st.error("Model file ('car_price_model.pkl') could not be loaded. Please ensure it is present in the working directory along with 'model.py'.")
+        
