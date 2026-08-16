@@ -28,6 +28,7 @@ st.markdown("""
         radial-gradient(circle at 80% 80%, rgba(255, 70, 70, 0.08), transparent 30%),
         #070b12;
     color: white;
+    overflow-x: hidden;
 }
 
 #MainMenu { visibility: hidden; }
@@ -69,7 +70,7 @@ header { visibility: hidden; }
 .hero {
     position: relative;
     overflow: hidden;
-    min-height: 420px;
+    min-height: 460px;
     border-radius: 28px;
     border: 1px solid rgba(255,255,255,0.09);
     background: 
@@ -288,25 +289,43 @@ div[data-baseweb="select"] > div, div[data-baseweb="input"] > div {
     }
 
     .hero {
-        padding: 30px 20px;
-        min-height: 320px;
+        padding: 25px 20px;
+        min-height: 390px; /* Adjusted height to fit mobile title + small car */
         border-radius: 20px;
     }
 
     .hero h1 {
-        font-size: 34px !important;
+        font-size: 32px !important;
         letter-spacing: -1.5px;
-        margin: 15px 0 12px 0;
+        margin: 12px 0 10px 0;
     }
 
     .hero p {
-        font-size: 14px;
+        font-size: 13px;
         line-height: 1.5;
     }
 
-    /* Hide heavy animations on small mobile screens to prevent performance lags and screen width breaks */
-    .road, .car {
-        display: none !important;
+    /* Scaling down the Road and Car for mobile so they look neat and don't break layout */
+    .road {
+        height: 75px;
+    }
+
+    .road::before {
+        top: 34px;
+        height: 3px;
+        background: repeating-linear-gradient(
+            90deg,
+            rgba(255,255,255,0.55) 0px,
+            rgba(255,255,255,0.55) 40px,
+            transparent 40px,
+            transparent 90px
+        );
+    }
+
+    .car {
+        transform: scale(0.55); /* Chota kar diya car ko */
+        transform-origin: bottom left;
+        bottom: 35px;
     }
 
     .section-title {
