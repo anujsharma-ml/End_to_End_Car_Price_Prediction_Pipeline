@@ -8,7 +8,7 @@ import pandas as pd
 import streamlit as st
 
 # ==========================================
-# FIX FOR SCIKIT-LEARN VERSION COMPATIBILITY
+# FIX 1: SCIKIT-LEARN _RemainderColsList FIX
 # ==========================================
 import sklearn.compose._column_transformer
 
@@ -19,6 +19,18 @@ if not hasattr(
         pass
 
     sklearn.compose._column_transformer._RemainderColsList = _RemainderColsList
+
+# ==========================================
+# FIX 2: SCIKIT-LEARN SimpleImputer FIX
+# ==========================================
+from sklearn.impute import SimpleImputer
+
+if not hasattr(SimpleImputer, "_fill_dtype"):
+    # Monkey patch to add missing attribute expected by older pickled imputer
+    def _get_fill_dtype(self, X):
+        return getattr(self, "fill_value_", None)
+
+    SimpleImputer._fill_dtype = property(_get_fill_dtype)
 
 # 1. Import Custom Transformer and Bind to __main__ for joblib unpickling
 from model import Iqrclipper
